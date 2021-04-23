@@ -4,17 +4,17 @@ The project was developed by data scientists and students of the specialization 
 
 ## Team:
 
-Ana Paula Fernandes Lucio Menezes 
-
-Gabriel Stankevix Soares
+* Ana Paula Fernandes Lucio Menezes 
+* Gabriel Stankevix Soares
 
 Heron Carlos Gonçalves
 
 Isabela  Fernanda Capetti
 
-# Status
+## Status
 
 
+## Article
 
 
-# Article
+## Limitations
