@@ -18,4 +18,10 @@ Working in progress
 
 Overleaf link
 
+https://www.overleaf.com/project/6048d9c3a97b1e652fac912b
+
+## Database
+Spatial database of Brazil, indigenous reserves and forest fires in Brazil. The data was stored in Postgresql and the integration with python for the development of the prediction model.
+
+
 ## Limitations
