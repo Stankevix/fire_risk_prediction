@@ -5,7 +5,6 @@ Created on Sat Apr 24 10:37:47 2021
 @author: Stankevix
 """
 
-
 # In[0]:
     
 import postgres_conn as pgc

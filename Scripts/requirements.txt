@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 psycopg2==2.8.6
 pandas==1.1.3
+=======
+psycopg2==2.8.6
+pandas==1.1.3
+>>>>>>> cb9ab284c7233838df5766b5f49b49126bc0bc32

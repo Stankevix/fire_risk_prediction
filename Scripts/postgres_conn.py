@@ -8,14 +8,8 @@ Created on Fri Apr 23 20:18:22 2021
 # In[0]:
 import psycopg2 as pg
 import pandas as pd
-# In[1]:
-    
-##SERVER = 'localhost' 
-#DATABASE = 'spatial' 
-#USERNAME = 'postgres' 
-#PWD = '1234'
 
-# In[3]:
+# In[2]:
 class db_conn:
     """ db_conn class for representing and manipulating postgres connection. """
 
@@ -45,7 +39,3 @@ class db_conn:
         df = pd.read_sql(sql, self.conn)
         return df
         
-
-
-
-
