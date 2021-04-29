@@ -13,7 +13,9 @@ import postgres_conn as pgc
 # In[1]: Scripts SQL 
     
 SCRIPT01 = '''
-select * from brasil LIMIT 10
+
+select * from queimadas_brasil_reservas
+
 '''
 
 # In[2]: Conectar com Postgres SQL
@@ -25,4 +27,16 @@ conn.postgres()
 
 # In[3]:
 
-df_brasil = conn.get_dataframe(SCRIPT01)    
+queimadas = conn.get_dataframe(SCRIPT01)
+
+
+# In[3]: ensemble
+
+queimadas.info()
+
+# In[3]: ensemble
+
+
+
+
+   
