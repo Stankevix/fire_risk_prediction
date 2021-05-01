@@ -1,7 +1,13 @@
 # FR_Prediction
 
-Repository for the FRP Prediction modeling project, the radiative fire energy distributed through burning in Brazilian forests. 
-The project was developed by data scientists and students of the specialization course in data science at the Universidade Tecnologica Federal do Parana.
+Com impactos ambientais e sociais, as ocorrências de queimadas vem aumentando nos últimos dois anos conforme focos monitorados desde 1998 pelo Instituto Nacional de Pesquisas Espaciais (INPE). Esses episódios de queima da vegetação nativa para desenvolvimento rural, urbano, na agricultura e pecuária aumentam a produção de poluentes atmosféricos e acabam alterando a biodiversidade brasileira.
+
+A medida risco fogo (RF) mensura a probabilidade de ocorrência de focos de incêndio e é baseada em dados meteorológicos diários obtidos por sensoriamento remoto espacial desenvolvida pelo INPE. 
+
+O Brasil é composto pelos biomas amazônia, cerrado, caatinga, pantanal, mata atlântica e pampa. Quando aplicada a métrica RF  em dados reais espaciais de queimadas e meteorológicos do ano de 2020/2021, segmentados por biomas e considerando variáveis exógenas temporais como mês e hora, pode-se observar comportamentos distintos em cada um deles. 
+
+Juntamente com os resultados dos testes estatísticos e análises de tendências, que apontam correlação com maior quantidade de variáveis que compõem este estudo, e o fato do pantanal ter tido quase um terço da sua área desvatada pelas queimadas em 2020, este bioma foi selecionado para aplicação de métodos de regressão baseados em árvores de decisão para predizer seus valores de RF. O erro médio quadrático resultante foi de 0,14 reafirmando importância de considerar variáveis exógenas temporais permitindo predizer a suscetibilidade de queimadas no pantanal.
+
 
 ## Team:
 
