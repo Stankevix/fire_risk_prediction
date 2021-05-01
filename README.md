@@ -1,4 +1,4 @@
-# FR_Prediction
+# RF_Prediction
 
 Com impactos ambientais e sociais, as ocorrências de queimadas vem aumentando nos últimos dois anos conforme focos monitorados desde 1998 pelo Instituto Nacional de Pesquisas Espaciais (INPE). Esses episódios de queima da vegetação nativa para desenvolvimento rural, urbano, na agricultura e pecuária aumentam a produção de poluentes atmosféricos e acabam alterando a biodiversidade brasileira.
 
