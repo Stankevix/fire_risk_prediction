@@ -17,39 +17,41 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder,MinMaxScaler
 
 
-from sklearn.ensemble import ExtraTreesRegressor
 
 from sklearn.compose import ColumnTransformer
 
 
 from sklearn.svm import LinearSVR
-from sklearn.linear_model import LinearRegression,ElasticNet,Ridge,SGDRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, GradientBoostingRegressor
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 
 from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split, GridSearchCV    
-    
+from sklearn.model_selection import train_test_split, GridSearchCV
+
+from sklearn.tree import export_graphviz
+from sklearn import tree
 
 SEED = 42
 
 #TARGET = ['frp']
+#FEATURES = ['riscofogo','bioma','avg_temp_ar','avg_umd_ar','avg_vento_velo']
 
-#FEATURES = ['estado','m_estado','municipio','bioma','riscofogo','diasemchuv',
-            #'avg_prep_total','avg_pressao_atm','avg_press_atm_max','avg_press_atm_min',
-            #'avg_rad_global','avg_temp_ar','avg_umd_ar','avg_vento_velo','hora']
+#FEATURES = ['diasemchuv','hora','mes','quadrimestre',
+            #'avg_prep_total','avg_pressao_atm',
+            #'avg_umd_ar','avg_temp_ar','avg_vento_velo']
 
 
 TARGET = ['riscofogo']
-FEATURES = ['diasemchuv','avg_umd_ar','hora']
+FEATURES = ['diasemchuv','mes','quadrimestre','avg_pressao_atm','avg_umd_ar', 'municipio']
 
 
 # In[1]: Funcoes Gerais
     
 def read_csv():
-    df = pd.read_csv('queimadas.csv',',')
+    df = pd.read_csv('pantanal.csv',',')
     
-    df['riscofogo'] = df['riscofogo'].interpolate(method='linear')
+    #df['riscofogo'] = df['riscofogo'].interpolate(method='linear')
 
     return df
 
@@ -82,8 +84,7 @@ def prep_target(y,y_train, y_test):
 
 
     num_transf = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='mean')),
-    ('scaler', MinMaxScaler())])
+    ('imputer', SimpleImputer(strategy='mean'))])
     
     preprocessor = ColumnTransformer(
     transformers=[('num', num_transf, num_target)])
@@ -124,8 +125,32 @@ def prep_pipeline(X,y):
 
 
 # In[2]: Grid Search Model
+def get_decisiontree_regressor(X_train,y_train):
+    dt = DecisionTreeRegressor(random_state=0)
+
+    params_dt = {
+        'max_features':['auto','sqrt','log2'],
+        'max_depth':[5,8,10,15,20,25,30],
+        'min_samples_split':[5,8,10],
+        'min_samples_leaf':[2,4]
+    }
     
+
+    grid_dt = GridSearchCV(estimator = dt, 
+                           param_grid = params_dt,
+                           scoring ='neg_mean_squared_error',
+                           cv = 3, 
+                           verbose = 1,
+                           n_jobs = -1)
     
+    grid_dt.fit(X_train, y_train.ravel())
+    print('CV Score for best Decision Tree Regressor model: {:.2f}'.format(cv_score(grid_dt.best_score_)))
+    best_model_dt = grid_dt.best_estimator_
+    return best_model_dt
+
+
+
+
 def get_linear_regressor(X_train,y_train):
     linear = LinearRegression()
 
@@ -143,8 +168,8 @@ def get_linear_regressor(X_train,y_train):
     grid_linear.fit(X_train, y_train.ravel())
     print('CV Score for best Linear Regressor model: {:.2f}'.format(cv_score(grid_linear.best_score_)))
     best_model_linear = grid_linear.best_estimator_
-    
     return best_model_linear
+
 def get_svr_regressor(X_train,y_train):
     
     svr = LinearSVR()
@@ -172,8 +197,13 @@ def get_svr_regressor(X_train,y_train):
 def get_rf_regressor(X_train,y_train):
     
     rf = RandomForestRegressor(random_state= 0)
+    
     params_rf = {
-        'n_estimators': [100]
+        'n_estimators': [200, 300, 400,500],
+        'max_features':['auto','sqrt'],
+        'max_depth':[5,8,10,15,20,25,30],
+        'min_samples_split':[5,8,10],
+        'min_samples_leaf':[2,4]
     }
     
     grid_rf = GridSearchCV(estimator = rf,
@@ -185,18 +215,39 @@ def get_rf_regressor(X_train,y_train):
     
     grid_rf.fit(X_train, y_train.ravel())
     
-    print('CV Score for best Random Forest Regressor model: {:.2f}'.format(cv_score(grid_rf.best_score_)))
+    print('CV Score for best Random Forest Regressor model {:.2f}'.format(cv_score(grid_rf.best_score_)))
     best_model = grid_rf.best_estimator_
-    return best_model 
+    return best_model
+
+
+def get_extratree_regressor(X_train,y_train):
+    
+    extratrees = ExtraTreesRegressor(random_state= 0)
+    
+    params_extratrees = {
+    }
+    
+    grid_extratrees = GridSearchCV(estimator = extratrees,
+                       param_grid = params_extratrees,
+                       scoring ='neg_mean_squared_error',
+                       cv = 3,
+                       verbose = 1,
+                       n_jobs = -1)
+    
+    grid_extratrees.fit(X_train, y_train.ravel())
+    
+    print('CV Score for best Extra Trees Regressor model {:.2f}'.format(cv_score(grid_extratrees.best_score_)))
+    best_model = grid_extratrees.best_estimator_
+    return best_model
+
+
 
 def get_gbr_regressor(X_train,y_train):
-    
-    
-    
+
     gbr = GradientBoostingRegressor(random_state=0)
 
     params_gbr = {
-        'n_estimators': [100],
+        'n_estimators': [100,300,500,700],
         'loss': ['ls', 'lad', 'huber', 'quantile'],
         'max_features': ['auto','sqrt','log2']
     }
@@ -217,28 +268,24 @@ def get_gbr_regressor(X_train,y_train):
 def rmse_dataframe(rmse):
     
     rmse_result = pd.DataFrame(rmse)
-    rmse_result['model'] = ['linear_regression',
-                            'svr_regressor',
+    rmse_result['model'] = ['decision_tree',
                             'random_forest_regressor',
+                            'extra_tree_regressor',
                             'gbr']
     rmse_result.columns = ['rmse','model']
     rmse_result = rmse_result[['model','rmse']]
     
     return rmse_result
 
-
-
 def prediction_dataframe(li,y_test):
     df_predict = pd.DataFrame(li).T
     df_predict['y_Test'] = pd.DataFrame(y_test)
-    df_predict.rename(columns={0:'linear_regression',
-                                      1:'svr_regressor',
-                                      2:'random_forest_regressor',
+    df_predict.rename(columns={0:'decision_tree',
+                                      1:'random_forest_regressor',
+                                      2:'extra_tree_regressor',
                                       3:'gbr',
                                       }, 
                              inplace=True)
-    
-    
     return df_predict
 
 
@@ -269,7 +316,7 @@ def model_selection(X,y, classifier):
         rmse.append(rmse_result)
         li.append(pred_test)
         
-        print('\n TEST - Root Mean Squared Error:', rmse_result) 
+        print('\n TEST - Root Mean Squared Error: : {:.2f}'.format(rmse_result)) 
     
     prediction_dataframe(li,y_test)
     
@@ -284,15 +331,16 @@ queimadas = read_csv()
 # In[4]: Transformar dados
 X_train, X_test, y_train, y_test, preprocessor = prep_pipeline(queimadas[FEATURES],queimadas[TARGET])
 
-# In[5]: Escolher Modelos - Regressão Linear
+# In[5]: Escolher Modelos - Arvore de Decisão Regressão
 
-ln_model = get_linear_regressor(X_train,y_train)
+dt_model = get_decisiontree_regressor(X_train,y_train)
 
-# In[6]:  Escolher Modelos - SVR Linear
-svr_model = get_svr_regressor(X_train,y_train)
-
-# In[7]:  Escolher Modelos - RandomForestRegressor
+# In[6]:  Escolher Modelos - RandomForestRegressor
 rf_model = get_rf_regressor(X_train,y_train)
+
+# In[7]:  Escolher Modelos - ExtraTreeRegressor
+extreg_model = get_extratree_regressor(X_train,y_train)
+
 
 # In[8]:  Escolher Modelos - Grandient Boost Regressor
 gbr_model = get_gbr_regressor(X_train,y_train)
@@ -300,22 +348,39 @@ gbr_model = get_gbr_regressor(X_train,y_train)
 
 # In[9]:  Escolher Modelos - Grandient Boost Regressor
 classifiers = [
-    ln_model,
-    svr_model,
+    dt_model,
     rf_model,
+    extreg_model,
     gbr_model
     ]
 
 li, rmse = model_selection(queimadas[FEATURES],queimadas[TARGET],classifiers)
 
-# In[10]:
+# In[10]: feature Importance
 
 
+feature_importances = rf_model.feature_importances_
+'''
+data = {'Features':['diasemchuv',
+                    'mes',
+                    'quadrimestre',
+                    'avg_pressao_atm',
+                    'avg_umd_ar'],
+        'Ratings':feature_importances}
 
+df_data = pd.DataFrame(data, index =['0', '1', '2', '3','4'])  '''
 
+# In[10]: feature Importance
 
-
-
+fn=FEATURES
+cn=TARGET
+fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=800)
+tree.plot_tree(rf_model.estimators_[0],
+               feature_names = fn, 
+               class_names=cn,
+               rounded=True,
+               filled = True);
+fig.savefig('rf_individualtree.png')
 
 
 
