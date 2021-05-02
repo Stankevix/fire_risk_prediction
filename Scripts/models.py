@@ -22,7 +22,7 @@ from sklearn.compose import ColumnTransformer
 
 
 from sklearn.svm import LinearSVR
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression,ElasticNet,Ridge
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, GradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 
@@ -37,13 +37,13 @@ SEED = 42
 #TARGET = ['frp']
 #FEATURES = ['riscofogo','bioma','avg_temp_ar','avg_umd_ar','avg_vento_velo']
 
-#FEATURES = ['diasemchuv','hora','mes','quadrimestre',
-            #'avg_prep_total','avg_pressao_atm',
-            #'avg_umd_ar','avg_temp_ar','avg_vento_velo']
+FEATURES = ['diasemchuv','hora','mes','quadrimestre',
+            'avg_prep_total','avg_pressao_atm',
+            'avg_umd_ar','avg_temp_ar','avg_vento_velo']
 
 
 TARGET = ['riscofogo']
-FEATURES = ['diasemchuv','mes','quadrimestre','avg_pressao_atm','avg_umd_ar', 'municipio']
+#FEATURES = ['diasemchuv','mes','quadrimestre','avg_pressao_atm','avg_umd_ar','avg_temp_ar']
 
 
 # In[1]: Funcoes Gerais
@@ -144,12 +144,9 @@ def get_decisiontree_regressor(X_train,y_train):
                            n_jobs = -1)
     
     grid_dt.fit(X_train, y_train.ravel())
-    print('CV Score for best Decision Tree Regressor model: {:.2f}'.format(cv_score(grid_dt.best_score_)))
+    print('CV Score for best Decision Tree Regressor model: {:.3f}'.format(cv_score(grid_dt.best_score_)))
     best_model_dt = grid_dt.best_estimator_
     return best_model_dt
-
-
-
 
 def get_linear_regressor(X_train,y_train):
     linear = LinearRegression()
@@ -166,9 +163,35 @@ def get_linear_regressor(X_train,y_train):
                            n_jobs = -1)
     
     grid_linear.fit(X_train, y_train.ravel())
-    print('CV Score for best Linear Regressor model: {:.2f}'.format(cv_score(grid_linear.best_score_)))
+    print('CV Score for best Linear Regressor model: {:.3f}'.format(cv_score(grid_linear.best_score_)))
     best_model_linear = grid_linear.best_estimator_
     return best_model_linear
+
+
+def get_ridge_regression(X_train,y_train):
+    ridge = Ridge(random_state=0)
+
+
+    params_ridge = {
+        'alpha': [1e-15, 1e-10, 1e-8, 9e-4, 7e-4, 5e-4, 3e-4, 
+                  1e-4, 1e-3, 5e-2, 1e-2, 0.1, 0.3, 1, 3, 5, 10, 15, 
+                  18, 20, 30, 50, 75, 100],
+        'solver': ['auto','cholesky']
+    }
+    
+    
+    grid_ridge = GridSearchCV(estimator = ridge,
+                           param_grid = params_ridge,
+                           scoring ='neg_mean_squared_error',
+                           cv = 3,
+                           verbose = 1,
+                           n_jobs = -1)
+    
+    grid_ridge.fit(X_train, y_train.ravel())
+    print('CV Score for best Linear Ridge Regressor model: {:.3f}'.format(cv_score(grid_ridge.best_score_)))
+    best_model_linear = grid_ridge.best_estimator_
+    return best_model_linear
+
 
 def get_svr_regressor(X_train,y_train):
     
@@ -190,7 +213,7 @@ def get_svr_regressor(X_train,y_train):
                            n_jobs = -1)
     
     grid_svr.fit(X_train, y_train.ravel())
-    print('CV Score for best SVR Regressor model: {:.2f}'.format(cv_score(grid_svr.best_score_)))
+    print('CV Score for best SVR Regressor model: {:.3f}'.format(cv_score(grid_svr.best_score_)))
     best_model = grid_svr.best_estimator_
     return best_model
 
@@ -199,7 +222,7 @@ def get_rf_regressor(X_train,y_train):
     rf = RandomForestRegressor(random_state= 0)
     
     params_rf = {
-        'n_estimators': [200, 300, 400,500],
+        'n_estimators': [400,500,700],
         'max_features':['auto','sqrt'],
         'max_depth':[5,8,10,15,20,25,30],
         'min_samples_split':[5,8,10],
@@ -215,7 +238,7 @@ def get_rf_regressor(X_train,y_train):
     
     grid_rf.fit(X_train, y_train.ravel())
     
-    print('CV Score for best Random Forest Regressor model {:.2f}'.format(cv_score(grid_rf.best_score_)))
+    print('CV Score for best Random Forest Regressor model {:.3f}'.format(cv_score(grid_rf.best_score_)))
     best_model = grid_rf.best_estimator_
     return best_model
 
@@ -236,7 +259,7 @@ def get_extratree_regressor(X_train,y_train):
     
     grid_extratrees.fit(X_train, y_train.ravel())
     
-    print('CV Score for best Extra Trees Regressor model {:.2f}'.format(cv_score(grid_extratrees.best_score_)))
+    print('CV Score for best Extra Trees Regressor model {:.3f}'.format(cv_score(grid_extratrees.best_score_)))
     best_model = grid_extratrees.best_estimator_
     return best_model
 
@@ -247,9 +270,11 @@ def get_gbr_regressor(X_train,y_train):
     gbr = GradientBoostingRegressor(random_state=0)
 
     params_gbr = {
-        'n_estimators': [100,300,500,700],
+        'n_estimators': [700],
         'loss': ['ls', 'lad', 'huber', 'quantile'],
-        'max_features': ['auto','sqrt','log2']
+        'max_features': ['auto','sqrt','log2'],
+        'max_depth':[3,5,8,10],
+        'subsample':[0.8,1]
     }
     
     grid_gbr = GridSearchCV(estimator = gbr,
@@ -261,14 +286,16 @@ def get_gbr_regressor(X_train,y_train):
     
     grid_gbr.fit(X_train, y_train.ravel())
     
-    print('CV Score for best Grandient Boost Regressor model: {:.2f}'.format(cv_score(grid_gbr.best_score_)))
+    print('CV Score for best Grandient Boost Regressor model: {:.3f}'.format(cv_score(grid_gbr.best_score_)))
     best_model = grid_gbr.best_estimator_
     return best_model 
 
 def rmse_dataframe(rmse):
     
     rmse_result = pd.DataFrame(rmse)
-    rmse_result['model'] = ['decision_tree',
+    rmse_result['model'] = ['linear_regression',
+                            'ridge_regression',
+                            'decision_tree',
                             'random_forest_regressor',
                             'extra_tree_regressor',
                             'gbr']
@@ -280,11 +307,13 @@ def rmse_dataframe(rmse):
 def prediction_dataframe(li,y_test):
     df_predict = pd.DataFrame(li).T
     df_predict['y_Test'] = pd.DataFrame(y_test)
-    df_predict.rename(columns={0:'decision_tree',
-                                      1:'random_forest_regressor',
-                                      2:'extra_tree_regressor',
-                                      3:'gbr',
-                                      }, 
+    df_predict.rename(columns={0:'linear_regression',
+                               1:'ridge_regression',
+                               2:'decision_tree',
+                               3:'random_forest_regressor',
+                               4:'extra_tree_regressor',
+                               5:'gbr',
+                               }, 
                              inplace=True)
     return df_predict
 
@@ -316,7 +345,7 @@ def model_selection(X,y, classifier):
         rmse.append(rmse_result)
         li.append(pred_test)
         
-        print('\n TEST - Root Mean Squared Error: : {:.2f}'.format(rmse_result)) 
+        print('\n TEST - Root Mean Squared Error: : {:.3f}'.format(rmse_result)) 
     
     prediction_dataframe(li,y_test)
     
@@ -331,23 +360,32 @@ queimadas = read_csv()
 # In[4]: Transformar dados
 X_train, X_test, y_train, y_test, preprocessor = prep_pipeline(queimadas[FEATURES],queimadas[TARGET])
 
-# In[5]: Escolher Modelos - Arvore de Decisão Regressão
+# In[5]: Escolher Modelos - Regressão Linear
+
+ln_model = get_linear_regressor(X_train,y_train)
+
+ln_ridge_model = get_ridge_regression(X_train,y_train)
+
+
+# In[6]: Escolher Modelos - Arvore de Decisão Regressão
 
 dt_model = get_decisiontree_regressor(X_train,y_train)
 
-# In[6]:  Escolher Modelos - RandomForestRegressor
+# In[7]:  Escolher Modelos - RandomForestRegressor
 rf_model = get_rf_regressor(X_train,y_train)
 
-# In[7]:  Escolher Modelos - ExtraTreeRegressor
+# In[8]:  Escolher Modelos - ExtraTreeRegressor
 extreg_model = get_extratree_regressor(X_train,y_train)
 
 
-# In[8]:  Escolher Modelos - Grandient Boost Regressor
+# In[9]:  Escolher Modelos - Grandient Boost Regressor
 gbr_model = get_gbr_regressor(X_train,y_train)
 
 
-# In[9]:  Escolher Modelos - Grandient Boost Regressor
+# In[10]:  Escolher Modelos - Grandient Boost Regressor
 classifiers = [
+    ln_model,
+    ln_ridge_model,
     dt_model,
     rf_model,
     extreg_model,
@@ -356,7 +394,7 @@ classifiers = [
 
 li, rmse = model_selection(queimadas[FEATURES],queimadas[TARGET],classifiers)
 
-# In[10]: feature Importance
+# In[11]: feature Importance
 
 
 feature_importances = rf_model.feature_importances_
