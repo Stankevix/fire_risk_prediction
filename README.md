@@ -27,7 +27,6 @@ Overleaf link
 https://www.overleaf.com/project/6048d9c3a97b1e652fac912b
 
 ## Database
-Spatial database of Brazil, indigenous reserves and forest fires in Brazil. The data was stored in Postgresql and the integration with python for the development of the prediction model.
-
+Banco de dados espacial do Brasil, reservas indígenas e incêndios florestais no Brasil. Os dados foram armazenados em Postgresql e a integração com python para o desenvolvimento do modelo de predição.
 
 ## Limitations
