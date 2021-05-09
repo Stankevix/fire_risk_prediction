@@ -20,6 +20,13 @@ Juntamente com os resultados dos testes estatísticos e análises de tendências
 
 Working in progress
 
+## Codes
+
+* postgres_conn: Arquivo com a classe de conexão com postgresql
+* feature_eng: Conexão com banco de dados e extração de dados conforme query.
+* models: Ensemble de modelos de regressão e arvore de decisão
+
+
 ## Article
 
 Overleaf link
