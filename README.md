@@ -9,6 +9,11 @@ O Brasil é composto pelos biomas amazônia, cerrado, caatinga, pantanal, mata a
 Juntamente com os resultados dos testes estatísticos e análises de tendências, que apontam correlação com maior quantidade de variáveis que compõem este estudo, e o fato do pantanal ter tido quase um terço da sua área desvatada pelas queimadas em 2020, este bioma foi selecionado para aplicação de métodos de regressão baseados em árvores de decisão para predizer seus valores de RF. O erro médio quadrático resultante foi de 0,14 reafirmando importância de considerar variáveis exógenas temporais permitindo predizer a suscetibilidade de queimadas no pantanal.
 
 
+<p align="center">
+  <img src="https://github.com/Stankevix/risco_fogo_prediction/blob/main/Docs/random_forest.png" alt="Sublime's custom image"/>
+</p>
+
+
 ## Team:
 
 * Ana Paula Fernandes Lucio Menezes 
@@ -37,3 +42,5 @@ https://www.overleaf.com/project/6048d9c3a97b1e652fac912b
 Banco de dados espacial do Brasil, reservas indígenas e incêndios florestais no Brasil. Os dados foram armazenados em Postgresql e a integração com python para o desenvolvimento do modelo de predição.
 
 ## Limitations
+
+Dados apenas de 2020, necessario explorar um historico maior de dados.
